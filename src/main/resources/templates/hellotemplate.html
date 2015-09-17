@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hello application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+<h1>Hello Template</h1>
+
+
+<p th:text="'Hello, ' + ${name} + '!'" />
+
+
+<pre>
+hardcoded hello
+</pre>
+
+<p>
+    <b>Note:</b>
+You can add a parameter to this url to be greeted by your name, like: '?name=Dirk'
+</p>
+
+
+</body>
+</html>
