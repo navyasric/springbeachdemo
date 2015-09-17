@@ -1,0 +1,223 @@
+
+NEW COPY at SPRING BEACH DEMO               -*- mode: org -*-
+
+
+* Don't forget
+
+- localhost:8080/ is not an entry point, you will get an error.  try
+  http://localhost:8080/jhoeller/bookmarks.
+
+
+* Resources
+
+book about spring-boot, video on debugging spring boot
+http://blog.greglturnquist.com/category/learning-spring-boot
+
+
+* JPA
+We use JPA, the java persistence api.  find more here
+https://dzone.com/refcardz/getting-started-with-jpa
+
+@entity -> class mapped to table
+@OneToMany -> create a column in another table, which will the id of this row
+  so that each bookmark has a AccountID, linking it to a user.
+
+@ManyToOne -> the reverse, used in Bookmark.
+
+* Original project and running that
+
+found on github, tut-bookmarks
+http://spring.io/guides/tutorials/bookmarks/
+
+note that this is a multi project source tree, for example 'mvn
+spring-boot:run' will run three projects (rest, hateaos, security; I think).
+
+maven does not like multiproject trees, neither does gradle.  
+
+** how to run multitarget multimodule maven projects
+maven was not made for that, but the tut-bookmarks project is structured like this.  as a result,
+'mvn spring-boot:run' runs three projects and is annoying.  maven has no idea about a directory target, but you
+can set up profiles to do only certain things (SO had a few good links to that)
+
+** project and gradle built
+works but how to run it??
+
+- there is no mainclass in the MANIFEST.MF (see rest/build/tmp/jar/MANIFEST.MF )
+- there is no spring the jar:  java -cp rest/build/libs/rest-0.0.1-SNAPSHOT.jar bookmarks.Application
+  get around the manifest issue by hard running that class form that jar, but it will bomb with
+     Exception in thread "main" java.lang.NoClassDefFoundError: org/springframework/boot/SpringApplication
+=> this has to do with a missing dependency plugin for pom, see
+     http://docs.spring.io/spring-boot/docs/current/reference/html/getting-started-first-application.html#getting-started-first-application-executable-jar
+see stuck stack below
+
+
+* Maven
+build system like gradle, older.
+
+mvn package -> creates jars, works fine on the tut-bookmarks.  this doesn't use make dependencies it seems,
+  always recompiles everything (slow).
+  this even runs the unit tests, cool, but doesn't start the server.
+
+mvn dependency:purge-local-repository  -> removes all downloads etc, redownloads them
+mvn spring-boot:run  -> should run a spring boot project, but doesn't???
+
+mvn dependency:tree -> show which requirements have been pulled in and which packages depend on each other
+
+mvn spring-boot:run -> the right way to run a boot project, according to
+      http://docs.spring.io/spring-boot/docs/current/reference/html/getting-started-first-application.html
+ all is well but two database thingies are going wrong:
+ : 2015-09-16 12:21:12.379 ERROR 39552 --- [           main] org.hibernate.tool.hbm2ddl.SchemaExport  : HHH000389: Unsuccessful: alter table bookmark drop constraint FK_ciq1mimxer8m8fgvhduurri89 if exists
+ : 2015-09-16 12:21:12.379 ERROR 39552 --- [           main] org.hibernate.tool.hbm2ddl.SchemaExport  : Table "BOOKMARK" not found; SQL statement:
+and mysql is not installed...
+however it ends with
+: 2015-09-16 12:21:12.844  INFO 39552 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080/http
+: 2015-09-16 12:21:12.907  INFO 39552 --- [           main] bookmarks.Application                    : Started Application in 3.147 seconds (JVM running for 3.379)
+and if you hit localhost:8080 you see that the dispatcherServlet is started, so all is well (sigh)
+
+
+
+* Maven to gradle
+
+simply 'gradle init' in the top directory.    I then had to adjust the language level in the top build.gradle
+file : compileOptions {
+               sourceCompatibility JavaVersion.VERSION_1_8
+               targetCompatibility JavaVersion.VERSION_1_8
+both were set to 1.5, which does not allow the diamond operator in the line:
+               private Set<Bookmark> bookmarks = new HashSet<>();
+          and which also does not allow method references:
+                .map(BookmarkResource::new)
+
+
+
+** gradle tasks
+   
+** bootRun target
+this is the main target, it will build and then run
+
+** build target 
+just building the jars
+
+** gradle vs gradlew
+the wrapper (gradlew) is a shell script, which will locally download the right gradle binary and use it.  it
+als allows you to have your custom setup scripts.  it is small, so put in in vcs and it will download gradle
+in a secret place (.gradle) .
+Add gradlew with the 'gradle wrapper' task
+
+
+
+* Stuck stack
+** DONE no main class
+- when doing a mvn spring-boot:run on the tut-bookmarks project, we get an
+  "Unable to find a suitable main class, please add a 'mainClass' property -> [Help 1]"
+
+- fix: add this to top level pom.xml:
+   : <start-class>bookmarks.Application</start-class> <!-- dpj, from SO -->
+  the bookmarks. is the path, normally you call your package sth like io.pivotal.test.bookmarks
+
+Not sure where this is done in Gradle.
+
+
+** DONE no mysql
+
+think that pivotal, like others, doesn't like the standard mac setup and uses brew whereever possible. followed
+these guidelines:  https://echo.co/blog/os-x-1010-yosemite-local-development-environment-apache-php-and-mysql-homebrew
+: brew install -v mysql
+
+** DONE maven disappeared
+not sure how or why,
+: brew install maven
+
+
+** DONE JPA/ mysql doesn't seem to work
+we get the error about the drop on the bookmarks table, but not on the user table. I am not sure if this
+is a blocker after all.  there is a good pages / tutorial on using jpa with spring-boot:
+  https://spring.io/guides/gs/accessing-data-jpa/
+
+this page explains that the credentials should go in a persistence.xml file for production use.
+  http://www.informit.com/articles/article.aspx?p=1671224&seqNum=2
+
+the basic spring-boot-jpa page explains that various in memory dbs come for free -- no credentials needed.
+  http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-sql.html
+all you need to do is include some maven dependencies:
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+
+actually, it seems that just using persistence is enough for (modern) boot to pull in the dependencies.
+
+
+
+
+* Questions
+** can we hot update the webservice
+Jared says to always reboot, there is no hot update
+
+** run from intellij
+just running the application doesn't work (simple things work, not the
+personform).  
+several things do work:
+- add a Gradle bootRUn task
+- add a run to the main of the Application class.  Do not fiddle too
+  much with this run configuration, for example, it has a 'before:
+  make' which is not the same as the before make you can add by
+  hand. the differences are hidden somewhere in some intellij xml file
+  most likely, but it simply does not work
+- the advantage of this application.main run is that you can use it
+  with the debugger
+- the disadvantage is that you have to run bootRun every now and then
+  (adding a gradle dependency, for example:  The intellij refresh on
+  the gradle tab didn't do the job for me)
+
+
+* Setting up a bare bones project
+
+** DO NOT use initializr, built in to intellij
+https://www.jetbrains.com/idea/help/creating-spring-boot-projects.html?search=spring-boot
+http://patrickgrimard.com/2014/08/14/how-to-build-a-spring-boot-application-using-intellij-idea/
+
+creating it with New Project from the intellij editor does not work well at all, because the editor does not get set up 
+well at all.  specifically, no 'new class' option on the directory, no syntax highlighting on the annotation, etc etc
+
+
+
+**  download from start.spring.io and setup intellij debug and run configs
+
+create a package on the site
+download the zip
+have intellij import it , use  ' idea build.gradle' (or use open
+file.. ) and check autoimport 
+then run gradle build (command line, or gradle tasks inside intellij)
+
+
+
+to run the project w/i intellij, you can set up a gradle bootRun task
+(simply add a new configuration).  better is to run the main class ,
+that way you can also debug the project.  
+
+
+
+
+to create a runnable configuration:
+- choose spring boot settings
+- configuration - main class =  io.pivotal.SpringbeachdemoApplication
+- use classpath of module: Springbeachdemo
+- LEAVE THE before run: Make EXACTLY AS IS  
+- check "single instance only"
+- NEVER touch the make task as it is magical, you can not add it back
+  in the same way as intellij has created it the first time.  your
+  project will not work (spec. thymeleaf will fail) if you run from a
+  configuration in which you added make by hand.  WHY??
+
+- Run a separate gradle bootRun when necessary.
+
+
+** other potential starting points
+
+http://justinrodenbostel.com/2014/04/08/part-1-getting-started-again-build-a-web-app-with-spring-boot/
+

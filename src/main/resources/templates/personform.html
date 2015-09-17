@@ -1,0 +1,31 @@
+<html>
+<body>
+
+<h1>Person Form</h1>
+
+<p>
+Enter the details for a person here. Both fields have java validators on them and you will be returned to this
+form if you enter invalid data.  </p>
+
+<form action="#" th:action="@{/personform}" th:object="${person}" method="post">
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td><input type="text" th:field="*{name}" /></td>
+            <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</td>
+        </tr>
+        <tr>
+            <td>Age:</td>
+            <td><input type="text" th:field="*{age}" /></td>
+            <td th:if="${#fields.hasErrors('age')}" th:errors="*{age}">Errm</td>
+        </tr>
+        <tr>
+            <td><button type="submit">Submit</button></td>
+        </tr>
+    </table>
+</form>
+
+<p>------ the end ---------</p>
+
+</body>
+</html>

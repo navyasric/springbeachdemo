@@ -34,6 +34,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
     compile("org.springframework.boot:spring-boot-starter-web")
     runtime("org.hsqldb:hsqldb")
+    testCompile("com.jayway.jsonpath:json-path")
+    compile("org.projectlombok:lombok:1.16.2")
     testCompile("org.springframework.boot:spring-boot-starter-test") 
 }
 
