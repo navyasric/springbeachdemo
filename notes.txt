@@ -157,8 +157,10 @@ actually, it seems that just using persistence is enough for (modern) boot to pu
 * Questions
 ** can we hot update the webservice
 Jared says to always reboot, there is no hot update
+found the hotswop function of idea which allows you to do just this.
 
-** run from intellij
+
+** DONE run from intellij
 just running the application doesn't work (simple things work, not the
 personform).  
 several things do work:
@@ -220,4 +222,9 @@ to create a runnable configuration:
 ** other potential starting points
 
 http://justinrodenbostel.com/2014/04/08/part-1-getting-started-again-build-a-web-app-with-spring-boot/
+
+* Later
+** hot laoding
+is possible
+   http://docs.spring.io/spring-boot/docs/current/reference/html/howto-hotswapping.html
 

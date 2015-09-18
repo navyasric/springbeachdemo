@@ -1,7 +1,14 @@
+# standard exclusions
 .gradle/
 .idea/workspace.xml
 .idea/tasks.xml
 build/
+
+# folder for user content
 uploads/
+
+# emacs backup files of various types:
 *~
+.#*
+\#*#
 
