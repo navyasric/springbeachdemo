@@ -15,4 +15,6 @@ public class SpringbeachdemoApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringbeachdemoApplication.class, args);
     }
+
+
 }

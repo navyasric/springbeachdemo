@@ -9,6 +9,16 @@ import org.springframework.web.client.RestTemplate;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+/*
+
+NOTE NOTE NOTE
+with the inclusion of angular/bootstrap, these endpoints have stopped working.
+
+*/
+
+
+
+
 /**
  * Our main testing class, servers all kinds of greetings
  */
