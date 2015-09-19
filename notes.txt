@@ -233,6 +233,9 @@ is possible
 
 
 * Second tutorial
+
+this is outdated do not use
+
 ** links
 
 repo with final source
@@ -270,4 +273,8 @@ on the Spring Blog. Also some summary slides here:
 http://presos.dsyer.com/decks/security-micro-clients.html (so far
 minimal).
 
+
+* THE RIGHT TUTORIAL
+
+http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/index.html
 
